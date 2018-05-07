@@ -7,15 +7,32 @@
 2. Что делать если Боб не заморозил токен? Алиса выполняет close (после таймаута подписи. таймаут подписи не сделали)
 3. Что делать если алиса не забрала токен? Боб делает рефанд после таймаута и минусует алису.
 
-## Install 
+## Global
+
+```sh
+npm i -g Truffle
 ```
+
+## Install 
+
+```sh
 git clone https://github.com/swaponline/swap.truffle.git
 cd ./swap.truffle
-npm install
+npm i
 ```
 
 
 ## Test
+
+```sh
+truffle develop
+truffle(develop)> test
 ```
-npm test
+
+### todo:
+
+```md
+- больше проверок в тестах
+- заполнить truffle.js
+- code review
 ```

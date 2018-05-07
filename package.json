@@ -1,0 +1,27 @@
+{
+  "name": "swap.truffle",
+  "version": "1.0.0",
+  "description": "вынесли отдельно тесты в локальный трюфле, чтоб легче было отлаживать. Пока без офчейна, но можно тестировать без деплоя в ринки, чтоб не ждать пока зафейлится транза",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "web3": "^1.0.0-beta.34"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swaponline/swap.truffle.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/swaponline/swap.truffle/issues"
+  },
+  "homepage": "https://github.com/swaponline/swap.truffle#readme"
+}
