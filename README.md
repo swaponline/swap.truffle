@@ -10,7 +10,7 @@
 ## Global
 
 ```sh
-npm i -g Truffle
+npm i -g truffle
 ```
 
 ## Install 
