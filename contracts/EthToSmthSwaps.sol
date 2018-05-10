@@ -31,10 +31,15 @@ contract EthToSmthSwaps {
     ratingContractAddress = _ratingContractAddress;
   }
 
-  // BTC Owner init swap
+  // ETH Owner signs swap
   // initializing time for correct work of close() method
-  function sign(address _ownerAddress) public {
-    participantSigns[_ownerAddress][msg.sender] = now;
+  function sign(address _participantAddress) public {
+    participantSigns[msg.sender][_participantAddress] = now;
+  }
+
+  // BTC Owner checks if ETH Owner signed swap
+  function checkSign(address _ownerAddress) public view returns (uint) {
+    return participantSigns[_ownerAddress][msg.sender];
   }
 
   // ETH Owner creates Swap with secretHash

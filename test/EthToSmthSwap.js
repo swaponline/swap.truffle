@@ -50,9 +50,17 @@ contract('EthToSmthSwap >', async (accounts) => {
       })
 
       it('sign swap', async () => {
-        await Swap.sign(ethOwner, {
+        await Swap.sign(btcOwner, {
+          from: ethOwner,
+        })
+      })
+
+      it('check sign', async () => {
+        const isSigned = await Swap.checkSign(ethOwner, {
           from: btcOwner,
         })
+
+        assert.isTrue(Boolean(isSigned), 'swap not signed')
       })
 
       it('create swap', async () => {
@@ -142,9 +150,17 @@ contract('EthToSmthSwap >', async (accounts) => {
       })
 
       it('sign swap', async () => {
-        await Swap.sign(ethOwner, {
+        await Swap.sign(btcOwner, {
+          from: ethOwner,
+        })
+      })
+
+      it('check sign', async () => {
+        const isSigned = await Swap.checkSign(ethOwner, {
           from: btcOwner,
         })
+
+        assert.isTrue(Boolean(isSigned), 'swap not signed')
       })
 
       it('create swap', async () => {
@@ -218,9 +234,17 @@ contract('EthToSmthSwap >', async (accounts) => {
     describe('Init Swap >', () => {
 
       it('sign swap', async () => {
-        await Swap.sign(ethOwner, {
+        await Swap.sign(btcOwner, {
+          from: ethOwner,
+        })
+      })
+
+      it('check sign', async () => {
+        const isSigned = await Swap.checkSign(ethOwner, {
           from: btcOwner,
         })
+
+        assert.isTrue(Boolean(isSigned), 'swap not signed')
       })
     })
 
