@@ -2,16 +2,21 @@ pragma solidity ^0.4.23;
 
 contract Rating {
 
-  // owner - EthToBtcSwaps Contract
   address owner;
+  mapping(address => int) whitelist;
   mapping(address => int) ratings;
 
-  constructor (address _ownerAddress) public {
-    owner = _ownerAddress;
+  constructor () public {
+    owner = msg.sender;
+  }
+
+  function addToWhitelist(address _contractAddress) public {
+    require(msg.sender == owner);
+    whitelist[_contractAddress] = 1;
   }
 
   function change(address _userAddress, int _delta) public {
-    require(msg.sender == owner);
+    require(whitelist[msg.sender] == 1);
     ratings[_userAddress] += _delta;
   }
 

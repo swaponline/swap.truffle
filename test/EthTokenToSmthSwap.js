@@ -1,5 +1,5 @@
 const EthTokenToSmthSwaps   = artifacts.require('EthTokenToSmthSwaps')
-const RatingContract        = artifacts.require('Rating2')
+const RatingContract        = artifacts.require('Rating')
 const TokenContract         = artifacts.require('Token')
 
 const secret      = '0xc0809ce9f484fdcdfb2d5aabd609768ce0374ee97a1a5618ce4cd3f16c00a078'
@@ -24,6 +24,9 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   describe('Init >', () => {
 
     it('set rating contract', () => {
+      Rating.addToWhitelist(Swap.address, {
+        from: Owner,
+      })
       Swap.setRatingAddress(Rating.address, {
         from: Owner,
       })
