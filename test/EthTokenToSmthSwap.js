@@ -1,10 +1,10 @@
 const EthTokenToSmthSwaps   = artifacts.require('EthTokenToSmthSwaps')
-const ReputationContract    = artifacts.require('Reputation')
 const TokenContract         = artifacts.require('Token')
 
 const secret      = '0xc0809ce9f484fdcdfb2d5aabd609768ce0374ee97a1a5618ce4cd3f16c00a078'
 const secretHash  = '0xc0933f9be51a284acb6b1a6617a48d795bdeaa80'
 
+const timeTravel = require('./time-travel')
 
 contract('EthTokenToSmthSwap >', async (accounts) => {
 
@@ -12,25 +12,15 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   const btcOwner = accounts[1]
   const ethOwner = accounts[2]
 
-  let Swap, Reputation, Token
+  let Swap, Token
   let swapValue
 
   before('setup contract', async () => {
     Swap        = await EthTokenToSmthSwaps.deployed()
-    Reputation  = await ReputationContract.deployed()
     Token       = await TokenContract.deployed()
   })
 
   describe('Init >', () => {
-
-    it('set rating contract', () => {
-      Reputation.addToWhitelist(Swap.address, {
-        from: Owner,
-      })
-      Swap.setReputationAddress(Reputation.address, {
-        from: Owner,
-      })
-    })
 
     it('token mint', async () => {
       await Token.mint(ethOwner, 10000 ** 18, {
@@ -66,20 +56,6 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
 
       before('Swap init', () => {
         swapValue = 1e18
-      })
-
-      it('sign swap', async () => {
-        await Swap.sign(btcOwner, {
-          from: ethOwner,
-        })
-      })
-
-      it('check sign', async () => {
-        const isSigned = await Swap.checkSign(ethOwner, {
-          from: btcOwner,
-        })
-
-        assert.isTrue(Boolean(isSigned), 'swap not signed')
       })
 
       it('create swap', async () => {
@@ -133,24 +109,6 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         assert.equal(secret, _secret)
       })
 
-      it('close', async () => {
-        await Swap.close(btcOwner, {
-          from: ethOwner,
-        })
-      })
-
-      it('check creator rating', async () => {
-        const result = await Reputation.get.call(btcOwner)
-
-        assert.equal(result.toNumber(), 1, 'invalid rating')
-      })
-
-      it('check participant rating', async () => {
-        const result = await Reputation.get.call(btcOwner)
-
-        assert.equal(result.toNumber(), 1, 'invalid rating')
-      })
-
       // it('check swap cleaned', async () => {
       //   const result = await Swap.getInfo(ethOwner, btcOwner)
       //
@@ -170,20 +128,6 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
 
       before('Swap init', () => {
         swapValue = 1e18
-      })
-
-      it('sign swap', async () => {
-        await Swap.sign(btcOwner, {
-          from: ethOwner,
-        })
-      })
-
-      it('check sign', async () => {
-        const isSigned = await Swap.checkSign(ethOwner, {
-          from: btcOwner,
-        })
-
-        assert.isTrue(Boolean(isSigned), 'swap not signed')
       })
 
       it('create swap', async () => {
@@ -225,6 +169,8 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
       })
 
       it('refund', async () => {
+        await timeTravel(3600 * 3)
+
         await Swap.refund(btcOwner, {
           from: ethOwner,
         })
@@ -236,12 +182,6 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         assert.equal(ethOwnerBalance.toNumber() + swapValue, _ethOwnerBalance.toNumber())
       })
 
-      it('check participant rating', async () => {
-        const result = await Reputation.get.call(btcOwner)
-
-        // 0 bcs btcOwner received +1 in #1 case
-        assert.equal(result.toNumber(), 0, 'invalid rating')
-      })
 
       // it('check swap cleaned', async () => {
       //   const result = await Swap.getInfo.call(ethOwner, btcOwner)
@@ -259,41 +199,12 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
 
     describe('Init Swap >', () => {
 
-      it('sign swap', async () => {
-        await Swap.sign(btcOwner, {
-          from: ethOwner,
-        })
-      })
-
-      it('check sign', async () => {
-        const isSigned = await Swap.checkSign(ethOwner, {
-          from: btcOwner,
-        })
-
-        assert.isTrue(Boolean(isSigned), 'swap not signed')
-      })
     })
 
     describe('TimeOut >', () => {
 
       it('time', (done) => {
         setTimeout(done, 6000)
-      })
-    })
-
-    describe('Abort >', () => {
-
-      it('abort', async () => {
-        await Swap.abort(ethOwner, {
-          from: btcOwner,
-        })
-      })
-
-      it('check creator rating', async () => {
-        const result = await Reputation.get.call(ethOwner)
-
-        // 0 bcs ethOwner received +1 in #1 case
-        assert.equal(result.toNumber(), 0, 'invalid rating')
       })
     })
 
