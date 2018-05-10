@@ -1,6 +1,6 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
-import './Rating.sol';
+import './Reputation.sol';
 import './SafeMath.sol';
 import './Interfaces.sol';
 
@@ -28,7 +28,7 @@ contract EthTokenToSmthSwaps {
     owner = msg.sender;
   }
 
-  function setRatingAddress(address _ratingContractAddress) public {
+  function setReputationAddress(address _ratingContractAddress) public {
     require(owner == msg.sender);
     ratingContractAddress = _ratingContractAddress;
   }
@@ -72,7 +72,7 @@ contract EthTokenToSmthSwaps {
     require(swap.createdAt.add(SafeTime) > now);
 
     swaps[_ownerAddress][msg.sender].secret = _secret;
-    Rating(ratingContractAddress).change(msg.sender, 1);
+    Reputation(ratingContractAddress).change(msg.sender, 1);
     ERC20(swap.token).transfer(msg.sender, swap.balance);
   }
 
@@ -84,7 +84,7 @@ contract EthTokenToSmthSwaps {
   // ETH Owner closes swap
   // ETH Owner receive +1 reputation
   function close(address _participantAddress) public {
-    Rating(ratingContractAddress).change(msg.sender, 1);
+    Reputation(ratingContractAddress).change(msg.sender, 1);
     clean(msg.sender, _participantAddress);
   }
 
@@ -97,7 +97,7 @@ contract EthTokenToSmthSwaps {
     
     ERC20(swap.token).transfer(msg.sender, swap.balance);
     // TODO it looks like ETH Owner can create as many swaps as possible and refund them to decrease someone reputation
-    Rating(ratingContractAddress).change(_participantAddress, -1);
+    Reputation(ratingContractAddress).change(_participantAddress, -1);
     clean(msg.sender, _participantAddress);
   }
 
@@ -109,7 +109,7 @@ contract EthTokenToSmthSwaps {
     require(participantSigns[_ownerAddress][msg.sender] != uint(0));
     require(participantSigns[_ownerAddress][msg.sender].add(SafeTime) < now);
     
-    Rating(ratingContractAddress).change(_ownerAddress, -1);
+    Reputation(ratingContractAddress).change(_ownerAddress, -1);
     clean(_ownerAddress, msg.sender);
   }
 

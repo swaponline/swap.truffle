@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-contract Rating {
+contract Reputation {
 
   address owner;
   mapping(address => int) whitelist;

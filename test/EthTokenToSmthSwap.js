@@ -1,5 +1,5 @@
 const EthTokenToSmthSwaps   = artifacts.require('EthTokenToSmthSwaps')
-const RatingContract        = artifacts.require('Rating')
+const ReputationContract        = artifacts.require('Reputation')
 const TokenContract         = artifacts.require('Token')
 
 const secret      = '0xc0809ce9f484fdcdfb2d5aabd609768ce0374ee97a1a5618ce4cd3f16c00a078'
@@ -12,22 +12,22 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   const btcOwner = accounts[1]
   const ethOwner = accounts[2]
 
-  let Swap, Rating, Token
+  let Swap, Reputation, Token
   let swapValue
 
   before('setup contract', async () => {
     Swap   = await EthTokenToSmthSwaps.deployed()
-    Rating = await RatingContract.deployed()
+    Reputation = await ReputationContract.deployed()
     Token  = await TokenContract.deployed()
   })
 
   describe('Init >', () => {
 
     it('set rating contract', () => {
-      Rating.addToWhitelist(Swap.address, {
+      Reputation.addToWhitelist(Swap.address, {
         from: Owner,
       })
-      Swap.setRatingAddress(Rating.address, {
+      Swap.setReputationAddress(Reputation.address, {
         from: Owner,
       })
     })
@@ -124,13 +124,13 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
       })
 
       it('check creator rating', async () => {
-        const result = await Rating.get.call(btcOwner)
+        const result = await Reputation.get.call(btcOwner)
 
         assert.equal(result.toNumber(), 1, 'invalid rating')
       })
 
       it('check participant rating', async () => {
-        const result = await Rating.get.call(btcOwner)
+        const result = await Reputation.get.call(btcOwner)
 
         assert.equal(result.toNumber(), 1, 'invalid rating')
       })
@@ -205,7 +205,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
       })
 
       it('check participant rating', async () => {
-        const result = await Rating.get.call(btcOwner)
+        const result = await Reputation.get.call(btcOwner)
 
         // 0 bcs btcOwner received +1 in #1 case
         assert.equal(result.toNumber(), 0, 'invalid rating')
@@ -250,7 +250,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
       })
 
       it('check creator rating', async () => {
-        const result = await Rating.get.call(ethOwner)
+        const result = await Reputation.get.call(ethOwner)
 
         // 0 bcs ethOwner received +1 in #1 case
         assert.equal(result.toNumber(), 0, 'invalid rating')
