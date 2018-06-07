@@ -101,7 +101,8 @@ contract EthTokenToSmthSwaps {
   // BTC Owner gets -1 reputation
   function refund(address _participantAddress) public {
     Swap memory swap = swaps[msg.sender][_participantAddress];
-    
+
+    require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) < now);
     
     ERC20(swap.token).transfer(msg.sender, swap.balance);

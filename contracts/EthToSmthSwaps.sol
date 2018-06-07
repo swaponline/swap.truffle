@@ -98,6 +98,7 @@ contract EthToSmthSwaps {
   function refund(address _participantAddress) public {
     Swap memory swap = swaps[msg.sender][_participantAddress];
 
+    require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) < now);
 
     msg.sender.transfer(swap.balance);
