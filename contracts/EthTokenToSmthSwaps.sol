@@ -76,9 +76,11 @@ contract EthTokenToSmthSwaps {
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
-    swaps[_ownerAddress][msg.sender].secret = _secret;
     Reputation(ratingContractAddress).change(msg.sender, 1);
     ERC20(swap.token).transfer(msg.sender, swap.balance);
+
+    swaps[_ownerAddress][msg.sender].balance = 0;
+    swaps[_ownerAddress][msg.sender].secret = _secret;
   }
 
   // ETH Owner receive secret
