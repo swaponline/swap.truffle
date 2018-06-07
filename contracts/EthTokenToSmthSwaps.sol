@@ -62,12 +62,6 @@ contract EthTokenToSmthSwaps {
     );
   }
 
-  function getInfo(address _ownerAddress, address _participantAddress) public view returns (address, bytes32,  bytes20,  uint256,  uint256) {
-    Swap memory swap = swaps[_ownerAddress][_participantAddress];
-
-    return (swap.token, swap.secret, swap.secretHash, swap.createdAt, swap.balance);
-  }
-
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
   function withdraw(bytes32 _secret, address _ownerAddress) public {
@@ -122,10 +116,6 @@ contract EthTokenToSmthSwaps {
     
     Reputation(ratingContractAddress).change(_ownerAddress, -1);
     clean(_ownerAddress, msg.sender);
-  }
-
-  function unsafeGetSecret(address _ownerAddress, address _participantAddress) public view returns (bytes32) {
-    return swaps[_ownerAddress][_participantAddress].secret;
   }
 
   function clean(address _ownerAddress, address _participantAddress) internal {
