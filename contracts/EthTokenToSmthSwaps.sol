@@ -33,17 +33,23 @@ contract EthTokenToSmthSwaps {
     ratingContractAddress = _ratingContractAddress;
   }
 
+  event Sign();
+
   // ETH Owner signs swap
   // initializing time for correct work of close() method
   function sign(address _participantAddress) public {
     require(swaps[msg.sender][_participantAddress].balance == 0);
     participantSigns[msg.sender][_participantAddress] = now;
+
+    Sign();
   }
 
   // BTC Owner checks if ETH Owner signed swap
   function checkSign(address _ownerAddress) public view returns (uint) {
     return participantSigns[_ownerAddress][msg.sender];
   }
+
+  event CreateSwap(uint256 createdAt);
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
@@ -60,7 +66,11 @@ contract EthTokenToSmthSwaps {
       now,
       _value
     );
+
+    CreateSwap(now);
   }
+
+  event Withdraw();
 
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
@@ -76,12 +86,16 @@ contract EthTokenToSmthSwaps {
 
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
+
+    Withdraw();
   }
 
   // ETH Owner receive secret
   function getSecret(address _participantAddress) public view returns (bytes32) {
     return swaps[msg.sender][_participantAddress].secret;
   }
+
+  event Close();
   
   // ETH Owner closes swap
   // ETH Owner receive +1 reputation
@@ -90,7 +104,11 @@ contract EthTokenToSmthSwaps {
 
     Reputation(ratingContractAddress).change(msg.sender, 1);
     clean(msg.sender, _participantAddress);
+
+    Close();
   }
+
+  event Refund();
 
   // ETH Owner refund money
   // BTC Owner gets -1 reputation
@@ -104,7 +122,11 @@ contract EthTokenToSmthSwaps {
     // TODO it looks like ETH Owner can create as many swaps as possible and refund them to decrease someone reputation
     Reputation(ratingContractAddress).change(_participantAddress, -1);
     clean(msg.sender, _participantAddress);
+
+    Refund();
   }
+
+  event Abort();
 
   // BTC Owner closes Swap
   // If ETH Owner don't create swap after init in in safeTime
@@ -116,6 +138,8 @@ contract EthTokenToSmthSwaps {
     
     Reputation(ratingContractAddress).change(_ownerAddress, -1);
     clean(_ownerAddress, msg.sender);
+
+    Abort();
   }
 
   function clean(address _ownerAddress, address _participantAddress) internal {
