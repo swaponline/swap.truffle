@@ -66,6 +66,10 @@ contract EthToSmthSwaps {
     CreateSwap(now);
   }
 
+  function getBalance(address _ownerAddress) public view returns (uint256) {
+    return swaps[_ownerAddress][msg.sender].balance;
+  }
+
   event Withdraw();
 
   // BTC Owner withdraw money and adds secret key to swap
