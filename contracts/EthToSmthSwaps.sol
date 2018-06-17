@@ -66,6 +66,7 @@ contract EthToSmthSwaps {
     CreateSwap(now);
   }
 
+  // BTC Owner receive balance
   function getBalance(address _ownerAddress) public view returns (uint256) {
     return swaps[_ownerAddress][msg.sender].balance;
   }

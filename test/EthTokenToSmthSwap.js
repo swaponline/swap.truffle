@@ -88,13 +88,21 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         })
       })
 
-      it('check swap', async () => {
-        const result = await Swap.getInfo(ethOwner, btcOwner)
+      it('check balance', async () => {
+        const balance = await Swap.getBalance(ethOwner, {
+          from: btcOwner,
+        })
 
-        assert.equal(result[0], Token.address, 'Invalid TokenAddress')
-        assert.equal(result[2], secretHash, 'Invalid secretHash')
-        assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
+        assert.equal(swapValue, balance, 'Wrong balance')
       })
+
+      // it('check swap', async () => {
+      //   const result = await Swap.getInfo(ethOwner, btcOwner)
+      //
+      //   assert.equal(result[0], Token.address, 'Invalid TokenAddress')
+      //   assert.equal(result[2], secretHash, 'Invalid secretHash')
+      //   assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
+      // })
     })
 
     describe('Withdraw Swap >', () => {
@@ -143,11 +151,11 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         assert.equal(result.toNumber(), 1, 'invalid rating')
       })
 
-      it('check swap cleaned', async () => {
-        const result = await Swap.getInfo(ethOwner, btcOwner)
-
-        assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
-      })
+      // it('check swap cleaned', async () => {
+      //   const result = await Swap.getInfo(ethOwner, btcOwner)
+      //
+      //   assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
+      // })
 
     })
 
@@ -184,13 +192,21 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         })
       })
 
-      it('check swap', async () => {
-        const result = await Swap.getInfo(ethOwner, btcOwner)
+      it('check balance', async () => {
+        const balance = await Swap.getBalance(ethOwner, {
+          from: btcOwner,
+        })
 
-        assert.equal(result[0], Token.address, 'Invalid TokenAddress')
-        assert.equal(result[2], secretHash, 'Invalid secretHash')
-        assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
+        assert.equal(swapValue, balance, 'Wrong balance')
       })
+
+      // it('check swap', async () => {
+      //   const result = await Swap.getInfo(ethOwner, btcOwner)
+      //
+      //   assert.equal(result[0], Token.address, 'Invalid TokenAddress')
+      //   assert.equal(result[2], secretHash, 'Invalid secretHash')
+      //   assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
+      // })
     })
 
     describe('TimeOut >', () => {
@@ -227,11 +243,11 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         assert.equal(result.toNumber(), 0, 'invalid rating')
       })
 
-      it('check swap cleaned', async () => {
-        const result = await Swap.getInfo.call(ethOwner, btcOwner)
-
-        assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
-      })
+      // it('check swap cleaned', async () => {
+      //   const result = await Swap.getInfo.call(ethOwner, btcOwner)
+      //
+      //   assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
+      // })
     })
 
   })
