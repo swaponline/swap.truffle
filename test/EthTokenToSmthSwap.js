@@ -1,5 +1,5 @@
 const EthTokenToSmthSwaps   = artifacts.require('EthTokenToSmthSwaps')
-const ReputationContract        = artifacts.require('Reputation')
+const ReputationContract    = artifacts.require('Reputation')
 const TokenContract         = artifacts.require('Token')
 
 const secret      = '0xc0809ce9f484fdcdfb2d5aabd609768ce0374ee97a1a5618ce4cd3f16c00a078'
@@ -16,9 +16,9 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   let swapValue
 
   before('setup contract', async () => {
-    Swap   = await EthTokenToSmthSwaps.deployed()
-    Reputation = await ReputationContract.deployed()
-    Token  = await TokenContract.deployed()
+    Swap        = await EthTokenToSmthSwaps.deployed()
+    Reputation  = await ReputationContract.deployed()
+    Token       = await TokenContract.deployed()
   })
 
   describe('Init >', () => {

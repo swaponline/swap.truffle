@@ -4,7 +4,7 @@ import './Reputation.sol';
 import './SafeMath.sol';
 import './Interfaces.sol';
 
-contract EthTokenToSmthSwaps {
+contract EthTokenToSmthSwaps2 {
 
   using SafeMath for uint;
   

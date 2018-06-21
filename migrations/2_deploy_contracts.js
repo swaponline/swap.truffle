@@ -1,7 +1,7 @@
-const Reputation              = artifacts.require('./Reputation.sol')
-const EthToSmthSwaps      = artifacts.require('./EthToSmthSwaps.sol')
-const EthTokenToSmthSwaps = artifacts.require('./EthTokenToSmthSwaps.sol')
-const Token               = artifacts.require('./Token.sol')
+const Reputation            = artifacts.require('./Reputation.sol')
+const EthToSmthSwaps        = artifacts.require('./EthToSmthSwaps.sol')
+const EthTokenToSmthSwaps   = artifacts.require('./EthTokenToSmthSwaps.sol')
+const Token                 = artifacts.require('./Token.sol')
 
 
 module.exports = function (deployer) {
