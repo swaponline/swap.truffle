@@ -12,8 +12,6 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   const btcOwner = accounts[1]
   const ethOwner = accounts[2]
 
-  const poorOwner = accounts[3]
-
   let Swap, Reputation, Token
   let swapValue
 
@@ -302,50 +300,5 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   })
 
   // TODO add test case to check abort() then ethOwner created swap
-
-  /**
-   * Scenario #4: zero-balance case
-   */
-  describe('Scenario #4 zero-balance case >', () => {
-    describe('poorOwner without money >', () => {
-
-      before('Swap init', () => {
-        swapValue = 99e18 // > 0
-      })
-
-      it('poorOwner has zero balance', async () => {
-        const poorOwnerBalance = await Token.balanceOf.call(poorOwner)
-
-        assert.equal(poorOwnerBalance.toNumber(), 0, 'invalid balances')
-      })
-
-      it('sign swap', async () => {
-        await Swap.sign(btcOwner, {
-          from: poorOwner,
-        })
-      })
-
-      it('checks sign', async () => {
-        const isSigned = await Swap.checkSign(poorOwner, {
-          from: btcOwner,
-        })
-
-        assert.isTrue(Boolean(isSigned), 'swap not signed')
-      })
-
-      it('cannot create swap', async () => {
-        try {
-          await Swap.createSwap(secretHash, btcOwner, swapValue, Token.address, {
-            from: poorOwner,
-          })
-        } catch (error) {
-          assert.equal(error.message, 'VM Exception while processing transaction: revert')
-          return
-        }
-
-        assert.fail(null, null, 'Expected Swap to throw error due to low poorOwner balance')
-      })
-    })
-  })
 
 })
