@@ -1,6 +1,9 @@
-const EthTokenToSmthSwaps   = artifacts.require('EthTokenToSmthSwaps')
-const ReputationContract    = artifacts.require('Reputation')
-const TokenContract         = artifacts.require('Token')
+const EthTokenToSmthSwaps = artifacts.require('EthTokenToSmthSwaps')
+const ReputationContract  = artifacts.require('Reputation')
+const TokenContract       = artifacts.require('Token')
+const account             = require('web3-eth-accounts/node_modules/eth-lib/lib/account.js')
+const web31               = require('web3')
+const web3new             = new web31(web3.currentProvider)
 
 const secret      = '0xc0809ce9f484fdcdfb2d5aabd609768ce0374ee97a1a5618ce4cd3f16c00a078'
 const secretHash  = '0xc0933f9be51a284acb6b1a6617a48d795bdeaa80'
@@ -12,15 +15,13 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   const btcOwner = accounts[1]
   const ethOwner = accounts[2]
 
-  const poorOwner = accounts[3]
-
   let Swap, Reputation, Token
   let swapValue
 
   before('setup contract', async () => {
-    Swap        = await EthTokenToSmthSwaps.deployed()
-    Reputation  = await ReputationContract.deployed()
-    Token       = await TokenContract.deployed()
+    Swap   = await EthTokenToSmthSwaps.deployed()
+    Reputation = await ReputationContract.deployed()
+    Token  = await TokenContract.deployed()
   })
 
   describe('Init >', () => {
@@ -70,18 +71,32 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         swapValue = 1e18
       })
 
-      it('sign swap', async () => {
-        await Swap.sign(btcOwner, {
-          from: ethOwner,
+      it('sign swap from btcOwner', async () => {
+        let dataHash = web3new.utils.soliditySha3({
+            t: 'address',
+            v: ethOwner.address
+          }, {
+            t: 'bytes32',
+            v: _secretHash
+          },{
+            t: 'uint256',
+            v: _startTime
         })
+        let sign = account.sign(dataHash, btcOwner.privateKey)
       })
 
-      it('check sign', async () => {
-        const isSigned = await Swap.checkSign(ethOwner, {
-          from: btcOwner,
+      it('sign swap from ethOwner', async () => {
+        let dataHash = web3new.utils.soliditySha3({
+            t: 'address',
+            v: btcOwner.address
+          }, {
+            t: 'bytes32',
+            v: _secretHash
+          },{
+            t: 'uint256',
+            v: _startTime
         })
-
-        assert.isTrue(Boolean(isSigned), 'swap not signed')
+        let sign = account.sign(dataHash, ethOwner.privateKey)
       })
 
       it('create swap', async () => {
@@ -90,21 +105,13 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         })
       })
 
-      it('check balance', async () => {
-        const balance = await Swap.getBalance(ethOwner, {
-          from: btcOwner,
-        })
+      it('check swap', async () => {
+        const result = await Swap.getInfo(ethOwner, btcOwner)
 
-        assert.equal(swapValue, balance, 'Wrong balance')
+        assert.equal(result[0], Token.address, 'Invalid TokenAddress')
+        assert.equal(result[2], secretHash, 'Invalid secretHash')
+        assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
       })
-
-      // it('check swap', async () => {
-      //   const result = await Swap.getInfo(ethOwner, btcOwner)
-      //
-      //   assert.equal(result[0], Token.address, 'Invalid TokenAddress')
-      //   assert.equal(result[2], secretHash, 'Invalid secretHash')
-      //   assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
-      // })
     })
 
     describe('Withdraw Swap >', () => {
@@ -153,11 +160,11 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         assert.equal(result.toNumber(), 1, 'invalid rating')
       })
 
-      // it('check swap cleaned', async () => {
-      //   const result = await Swap.getInfo(ethOwner, btcOwner)
-      //
-      //   assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
-      // })
+      it('check swap cleaned', async () => {
+        const result = await Swap.getInfo(ethOwner, btcOwner)
+
+        assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
+      })
 
     })
 
@@ -194,21 +201,13 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         })
       })
 
-      it('check balance', async () => {
-        const balance = await Swap.getBalance(ethOwner, {
-          from: btcOwner,
-        })
+      it('check swap', async () => {
+        const result = await Swap.getInfo(ethOwner, btcOwner)
 
-        assert.equal(swapValue, balance, 'Wrong balance')
+        assert.equal(result[0], Token.address, 'Invalid TokenAddress')
+        assert.equal(result[2], secretHash, 'Invalid secretHash')
+        assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
       })
-
-      // it('check swap', async () => {
-      //   const result = await Swap.getInfo(ethOwner, btcOwner)
-      //
-      //   assert.equal(result[0], Token.address, 'Invalid TokenAddress')
-      //   assert.equal(result[2], secretHash, 'Invalid secretHash')
-      //   assert.equal(result[4].toNumber(), swapValue, 'Invalid Balance')
-      // })
     })
 
     describe('TimeOut >', () => {
@@ -245,11 +244,11 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
         assert.equal(result.toNumber(), 0, 'invalid rating')
       })
 
-      // it('check swap cleaned', async () => {
-      //   const result = await Swap.getInfo.call(ethOwner, btcOwner)
-      //
-      //   assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
-      // })
+      it('check swap cleaned', async () => {
+        const result = await Swap.getInfo.call(ethOwner, btcOwner)
+
+        assert.equal(result[0], '0x0000000000000000000000000000000000000000', 'Invalid TokenAddress')
+      })
     })
 
   })
@@ -302,50 +301,5 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   })
 
   // TODO add test case to check abort() then ethOwner created swap
-
-  /**
-   * Scenario #4: zero-balance case
-   */
-  describe('Scenario #4 zero-balance case >', () => {
-    describe('poorOwner without money >', () => {
-
-      before('Swap init', () => {
-        swapValue = 99e18 // > 0
-      })
-
-      it('poorOwner has zero balance', async () => {
-        const poorOwnerBalance = await Token.balanceOf.call(poorOwner)
-
-        assert.equal(poorOwnerBalance.toNumber(), 0, 'invalid balances')
-      })
-
-      it('sign swap', async () => {
-        await Swap.sign(btcOwner, {
-          from: poorOwner,
-        })
-      })
-
-      it('checks sign', async () => {
-        const isSigned = await Swap.checkSign(poorOwner, {
-          from: btcOwner,
-        })
-
-        assert.isTrue(Boolean(isSigned), 'swap not signed')
-      })
-
-      it('cannot create swap', async () => {
-        try {
-          await Swap.createSwap(secretHash, btcOwner, swapValue, Token.address, {
-            from: poorOwner,
-          })
-        } catch (error) {
-          assert.equal(error.message, 'VM Exception while processing transaction: revert')
-          return
-        }
-
-        assert.fail(null, null, 'Expected Swap to throw error due to low poorOwner balance')
-      })
-    })
-  })
 
 })

@@ -33,16 +33,23 @@ contract EthTokenToSmthSwaps {
     ratingContractAddress = _ratingContractAddress;
   }
 
+  event Sign();
+
   // ETH Owner signs swap
   // initializing time for correct work of close() method
   function sign(address _participantAddress) public {
+    require(swaps[msg.sender][_participantAddress].balance == 0);
     participantSigns[msg.sender][_participantAddress] = now;
+
+    Sign();
   }
 
   // BTC Owner checks if ETH Owner signed swap
   function checkSign(address _ownerAddress) public view returns (uint) {
     return participantSigns[_ownerAddress][msg.sender];
   }
+
+  event CreateSwap(uint256 createdAt);
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
@@ -59,13 +66,15 @@ contract EthTokenToSmthSwaps {
       now,
       _value
     );
+
+    CreateSwap(now);
   }
 
-  function getInfo(address _ownerAddress, address _participantAddress) public view returns (address, bytes32,  bytes20,  uint256,  uint256) {
-    Swap memory swap = swaps[_ownerAddress][_participantAddress];
-
-    return (swap.token, swap.secret, swap.secretHash, swap.createdAt, swap.balance);
+  function getBalance(address _ownerAddress) public view returns (uint256) {
+    return swaps[_ownerAddress][msg.sender].balance;
   }
+
+  event Withdraw();
 
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
@@ -76,35 +85,52 @@ contract EthTokenToSmthSwaps {
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
-    swaps[_ownerAddress][msg.sender].secret = _secret;
     Reputation(ratingContractAddress).change(msg.sender, 1);
     ERC20(swap.token).transfer(msg.sender, swap.balance);
+
+    swaps[_ownerAddress][msg.sender].balance = 0;
+    swaps[_ownerAddress][msg.sender].secret = _secret;
+
+    Withdraw();
   }
 
   // ETH Owner receive secret
   function getSecret(address _participantAddress) public view returns (bytes32) {
     return swaps[msg.sender][_participantAddress].secret;
   }
+
+  event Close();
   
   // ETH Owner closes swap
   // ETH Owner receive +1 reputation
   function close(address _participantAddress) public {
+    require(swaps[msg.sender][_participantAddress].balance == 0);
+
     Reputation(ratingContractAddress).change(msg.sender, 1);
     clean(msg.sender, _participantAddress);
+
+    Close();
   }
+
+  event Refund();
 
   // ETH Owner refund money
   // BTC Owner gets -1 reputation
   function refund(address _participantAddress) public {
     Swap memory swap = swaps[msg.sender][_participantAddress];
-    
+
+    require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) < now);
     
     ERC20(swap.token).transfer(msg.sender, swap.balance);
     // TODO it looks like ETH Owner can create as many swaps as possible and refund them to decrease someone reputation
     Reputation(ratingContractAddress).change(_participantAddress, -1);
     clean(msg.sender, _participantAddress);
+
+    Refund();
   }
+
+  event Abort();
 
   // BTC Owner closes Swap
   // If ETH Owner don't create swap after init in in safeTime
@@ -116,10 +142,8 @@ contract EthTokenToSmthSwaps {
     
     Reputation(ratingContractAddress).change(_ownerAddress, -1);
     clean(_ownerAddress, msg.sender);
-  }
 
-  function unsafeGetSecret(address _ownerAddress, address _participantAddress) public view returns (bytes32) {
-    return swaps[_ownerAddress][_participantAddress].secret;
+    Abort();
   }
 
   function clean(address _ownerAddress, address _participantAddress) internal {
