@@ -191,15 +191,6 @@ contract('EthToSmthSwap >', async (accounts) => {
       })
     })
 
-    describe('Abort >', () => {
-
-      it('abort', async () => {
-        await Swap.abort(ethOwner, {
-          from: btcOwner,
-        })
-      })
-
-    })
 
   })
 
