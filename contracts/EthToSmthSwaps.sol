@@ -47,7 +47,7 @@ contract EthToSmthSwaps {
     return participantSigns[_ownerAddress][msg.sender];
   }
 
-  event CreateSwap(uint256 createdAt);
+  event CreateSwap(address _buyer, address _seller, uint256 createdAt);
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
@@ -63,7 +63,7 @@ contract EthToSmthSwaps {
       msg.value
     );
 
-    CreateSwap(now);
+    CreateSwap(_participantAddress, msg.sender, now);
   }
 
   // BTC Owner receive balance
@@ -71,7 +71,7 @@ contract EthToSmthSwaps {
     return swaps[_ownerAddress][msg.sender].balance;
   }
 
-  event Withdraw();
+  event Withdraw(address _buyer, address _seller, uint256 withdrawnAt);
 
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
@@ -88,7 +88,7 @@ contract EthToSmthSwaps {
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
 
-    Withdraw();
+    Withdraw(msg.sender, _ownerAddress, now);
   }
 
   // ETH Owner receive secret
@@ -96,7 +96,7 @@ contract EthToSmthSwaps {
     return swaps[msg.sender][_participantAddress].secret;
   }
 
-  event Close();
+  event Close(address _buyer, address _seller);
 
   // ETH Owner closes swap
   // ETH Owner receive +1 reputation
@@ -106,10 +106,10 @@ contract EthToSmthSwaps {
     Reputation(ratingContractAddress).change(msg.sender, 1);
     clean(msg.sender, _participantAddress);
 
-    Close();
+    Close(_participantAddress, msg.sender);
   }
 
-  event Refund();
+  event Refund(address _buyer, address _seller);
 
   // ETH Owner refund money
   // BTC Owner gets -1 reputation
@@ -124,7 +124,7 @@ contract EthToSmthSwaps {
     Reputation(ratingContractAddress).change(_participantAddress, -1);
     clean(msg.sender, _participantAddress);
 
-    Refund();
+    Refund(_participantAddress, msg.sender);
   }
 
   event Abort();
