@@ -1,5 +1,3 @@
-const wtf = require('wtfnode')
-
 const EthToSmthSwaps      = artifacts.require('EthToSmthSwaps')
 const EthTokenToSmthSwaps = artifacts.require('EthTokenToSmthSwaps')
 
@@ -168,7 +166,6 @@ contract('swap.core >', (accounts) => {
   after(done => rimraf('.storage', done))
   after(() => dummy.kill())
 
-  after(() => { wtf.dump() })
   after(() => { setInterval(() => process.exit(), 10000) })
 
   after(() => room.connection.off('peer joined', room._handleUserOnline))
