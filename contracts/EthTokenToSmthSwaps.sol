@@ -1,16 +1,14 @@
 pragma solidity ^0.4.23;
 
-import './Reputation.sol';
 import './SafeMath.sol';
 import './Interfaces.sol';
 
 contract EthTokenToSmthSwaps {
 
   using SafeMath for uint;
-  
+
   address public owner;
-  address public ratingContractAddress;
-  uint256 SafeTime = 4 seconds; // atomic swap timeOut
+  uint256 SafeTime = 3 hours; // atomic swap timeOut
 
   struct Swap {
     address token;
@@ -22,31 +20,12 @@ contract EthTokenToSmthSwaps {
 
   // ETH Owner => BTC Owner => Swap
   mapping(address => mapping(address => Swap)) public swaps;
-  mapping(address => mapping(address => uint)) public participantSigns;
+
+  // ETH Owner => BTC Owner => secretHash => Swap
+  // mapping(address => mapping(address => mapping(bytes20 => Swap))) public swaps;
 
   constructor () public {
     owner = msg.sender;
-  }
-
-  function setReputationAddress(address _ratingContractAddress) public {
-    require(owner == msg.sender);
-    ratingContractAddress = _ratingContractAddress;
-  }
-
-  event Sign();
-
-  // ETH Owner signs swap
-  // initializing time for correct work of close() method
-  function sign(address _participantAddress) public {
-    require(swaps[msg.sender][_participantAddress].balance == 0);
-    participantSigns[msg.sender][_participantAddress] = now;
-
-    Sign();
-  }
-
-  // BTC Owner checks if ETH Owner signed swap
-  function checkSign(address _ownerAddress) public view returns (uint) {
-    return participantSigns[_ownerAddress][msg.sender];
   }
 
   event CreateSwap(uint256 createdAt);
@@ -55,7 +34,6 @@ contract EthTokenToSmthSwaps {
   // ETH Owner make token deposit
   function createSwap(bytes20 _secretHash, address _participantAddress, uint256 _value, address _token) public {
     require(_value > 0);
-    require(participantSigns[msg.sender][_participantAddress].add(SafeTime) > now);
     require(swaps[msg.sender][_participantAddress].balance == uint256(0));
     require(ERC20(_token).transferFrom(msg.sender, this, _value));
 
@@ -80,12 +58,11 @@ contract EthTokenToSmthSwaps {
   // BTC Owner receive +1 reputation
   function withdraw(bytes32 _secret, address _ownerAddress) public {
     Swap memory swap = swaps[_ownerAddress][msg.sender];
-    
+
     require(swap.secretHash == ripemd160(_secret));
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
-    Reputation(ratingContractAddress).change(msg.sender, 1);
     ERC20(swap.token).transfer(msg.sender, swap.balance);
 
     swaps[_ownerAddress][msg.sender].balance = 0;
@@ -99,19 +76,6 @@ contract EthTokenToSmthSwaps {
     return swaps[msg.sender][_participantAddress].secret;
   }
 
-  event Close();
-  
-  // ETH Owner closes swap
-  // ETH Owner receive +1 reputation
-  function close(address _participantAddress) public {
-    require(swaps[msg.sender][_participantAddress].balance == 0);
-
-    Reputation(ratingContractAddress).change(msg.sender, 1);
-    clean(msg.sender, _participantAddress);
-
-    Close();
-  }
-
   event Refund();
 
   // ETH Owner refund money
@@ -121,33 +85,14 @@ contract EthTokenToSmthSwaps {
 
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) < now);
-    
+
     ERC20(swap.token).transfer(msg.sender, swap.balance);
-    // TODO it looks like ETH Owner can create as many swaps as possible and refund them to decrease someone reputation
-    Reputation(ratingContractAddress).change(_participantAddress, -1);
     clean(msg.sender, _participantAddress);
 
     Refund();
   }
 
-  event Abort();
-
-  // BTC Owner closes Swap
-  // If ETH Owner don't create swap after init in in safeTime
-  // ETH Owner -1 reputation
-  function abort(address _ownerAddress) public {
-    require(swaps[_ownerAddress][msg.sender].balance == uint256(0));
-    require(participantSigns[_ownerAddress][msg.sender] != uint(0));
-    require(participantSigns[_ownerAddress][msg.sender].add(SafeTime) < now);
-    
-    Reputation(ratingContractAddress).change(_ownerAddress, -1);
-    clean(_ownerAddress, msg.sender);
-
-    Abort();
-  }
-
   function clean(address _ownerAddress, address _participantAddress) internal {
     delete swaps[_ownerAddress][_participantAddress];
-    delete participantSigns[_ownerAddress][_participantAddress];
   }
 }
