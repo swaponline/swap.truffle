@@ -7,7 +7,7 @@ exports = module.exports = ({ network, ...settings }) => {
 
   const config = getConfig(settings)
 
-  swap.app.setup(config)
+  swap.app.setup({ contracts: {}, ...config })
 
   return swap.app
 }
