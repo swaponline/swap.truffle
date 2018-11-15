@@ -110,6 +110,23 @@ contract EthToSmthSwaps {
     emit Withdraw();
   }
 
+  // Token Owner withdraw money when participan no money for gas and adds secret key to swap
+  // BTC Owner receive +1 reputation... may be
+  function withdrawNoMoney(bytes32 _secret, address participantAddress) public {
+    Swap memory swap = swaps[msg.sender][participantAddress];
+
+    require(swap.secretHash == ripemd160(_secret));
+    require(swap.balance > uint256(0));
+    require(swap.createdAt.add(SafeTime) > now);
+
+    swap.targetWallet.transfer(swap.balance);
+
+    swaps[_ownerAddress][msg.sender].balance = 0;
+    swaps[_ownerAddress][msg.sender].secret = _secret;
+
+    emit Withdraw();
+  }
+
   // ETH Owner receive secret
   function getSecret(address _participantAddress) public view returns (bytes32) {
     return swaps[msg.sender][_participantAddress].secret;
