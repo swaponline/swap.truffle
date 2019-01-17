@@ -17,7 +17,8 @@
     "truffle-hdwallet-provider": "^1.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "verify": "node verify.js",
+    "flatten": "solidity_flattener --output build/flattened.sol",
     "test": "truffle test"
   },
   "repository": {
