@@ -11,6 +11,7 @@ contract EthToSmthSwaps {
   uint256 SafeTime = 3 hours; // atomic swap timeOut
 
   struct Swap {
+    address targetWallet;
     bytes32 secret;
     bytes20 secretHash;
     uint256 createdAt;
@@ -53,6 +54,24 @@ contract EthToSmthSwaps {
     require(swaps[msg.sender][_participantAddress].balance == uint256(0));
 
     swaps[msg.sender][_participantAddress] = Swap(
+      _participantAddress,
+      bytes32(0),
+      _secretHash,
+      now,
+      msg.value
+    );
+
+    emit CreateSwap(now);
+  }
+
+  // ETH Owner creates Swap with secretHash
+  // ETH Owner make token deposit
+  function createSwapTarget(bytes20 _secretHash, address _participantAddress, address _targetWallet) public payable {
+    require(msg.value > 0);
+    require(swaps[msg.sender][_participantAddress].balance == uint256(0));
+
+    swaps[msg.sender][_participantAddress] = Swap(
+      _targetWallet,
       bytes32(0),
       _secretHash,
       now,
@@ -67,6 +86,11 @@ contract EthToSmthSwaps {
     return swaps[_ownerAddress][msg.sender].balance;
   }
 
+  // Get target wallet (buyer check)
+  function getTargetWallet(address _ownerAddress) public returns (address) {
+      return swaps[_ownerAddress][msg.sender].targetWallet;
+  }
+
   event Withdraw();
 
   // BTC Owner withdraw money and adds secret key to swap
@@ -78,7 +102,24 @@ contract EthToSmthSwaps {
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
-    msg.sender.transfer(swap.balance);
+    swap.targetWallet.transfer(swap.balance);
+
+    swaps[_ownerAddress][msg.sender].balance = 0;
+    swaps[_ownerAddress][msg.sender].secret = _secret;
+
+    emit Withdraw();
+  }
+
+  // Token Owner withdraw money when participan no money for gas and adds secret key to swap
+  // BTC Owner receive +1 reputation... may be
+  function withdrawNoMoney(bytes32 _secret, address participantAddress) public {
+    Swap memory swap = swaps[msg.sender][participantAddress];
+
+    require(swap.secretHash == ripemd160(_secret));
+    require(swap.balance > uint256(0));
+    require(swap.createdAt.add(SafeTime) > now);
+
+    swap.targetWallet.transfer(swap.balance);
 
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
