@@ -23,7 +23,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
   describe('Init >', () => {
 
     it('token mint', async () => {
-      await Token.mint(ethOwner, 10000 ** 18, {
+      await Token.mint(ethOwner, ''+10e18, {
         from: Owner,
       })
     })
@@ -31,11 +31,11 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
     it('check balances', async () => {
       const ethOwnerBalance = await Token.balanceOf.call(ethOwner)
 
-      assert.equal(ethOwnerBalance.toNumber(), 10000 ** 18, 'invalid balances')
+      assert.equal(ethOwnerBalance.toString(), ''+10e18, 'invalid balances')
     })
 
     it('approve', async () => {
-      await Token.approve(Swap.address, 10000 ** 18, {
+      await Token.approve(Swap.address, ''+10e18, {
         from: ethOwner
       })
     })
@@ -43,7 +43,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
     it('check approve', async () => {
       const ethOwnerApprove = await Token.allowance.call(ethOwner, Swap.address)
 
-      assert.equal(ethOwnerApprove, 10000 ** 18, 'invalid approve')
+      assert.equal(ethOwnerApprove, ''+10e18, 'invalid approve')
     })
   })
 
@@ -55,7 +55,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
     describe('Create Swap >', () => {
 
       before('Swap init', () => {
-        swapValue = 1e18
+        swapValue = '' + 1e18
       })
 
       it('create swap', async () => {
@@ -98,7 +98,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
       it('check participant balance', async () => {
         const _btcOwnerBalance = await Token.balanceOf.call(btcOwner)
 
-        assert.equal(btcOwnerBalance.toNumber() + swapValue, _btcOwnerBalance.toNumber())
+        assert.equal((Number(btcOwnerBalance) + Number(swapValue)).toString(), _btcOwnerBalance.toString())
       })
 
       it('check secret', async () => {
@@ -127,7 +127,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
     describe('Create Swap >', () => {
 
       before('Swap init', () => {
-        swapValue = 1e18
+        swapValue = '' + 1e18
       })
 
       it('create swap', async () => {
@@ -155,9 +155,9 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
 
     describe('TimeOut >', () => {
 
-      it('time', (done) => {
-        setTimeout(done, 6000)
-      })
+      // it('time', (done) => {
+      //   setTimeout(done, 6000)
+      // })
     })
 
     describe('Refund Swap >', () => {
@@ -179,7 +179,7 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
       it('check creator balance', async () => {
         const _ethOwnerBalance = await Token.balanceOf.call(ethOwner)
 
-        assert.equal(ethOwnerBalance.toNumber() + swapValue, _ethOwnerBalance.toNumber())
+        assert.equal((Number(ethOwnerBalance) + Number(swapValue)).toString(), _ethOwnerBalance.toString())
       })
 
 
@@ -202,10 +202,10 @@ contract('EthTokenToSmthSwap >', async (accounts) => {
     })
 
     describe('TimeOut >', () => {
-
-      it('time', (done) => {
-        setTimeout(done, 6000)
-      })
+      //
+      // it('time', (done) => {
+      //   setTimeout(done, 6000)
+      // })
     })
 
   })

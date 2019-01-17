@@ -16,8 +16,8 @@ const launchDummy = () => {
     app.services.room.on('ready', () => {
       startDummy(app.services)
     })
-  } catch ({ name, message, ...err }) {
-    console.log({ name, message, ...err })
+  } catch ({ name, message }) {
+    console.log('Error:', { name, message })
   }
 }
 

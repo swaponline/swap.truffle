@@ -25,7 +25,7 @@ contract('EthToSmthSwap >', async (accounts) => {
     it('check creator balance', async () => {
       const ethOwnerBalance = await web3.eth.getBalance(btcOwner)
 
-      assert.isTrue(ethOwnerBalance.toNumber() >= getSwapValue(), 'not enough balance')
+      assert.isTrue(ethOwnerBalance >= getSwapValue(), 'not enough balance')
     })
   })
 
@@ -77,7 +77,7 @@ contract('EthToSmthSwap >', async (accounts) => {
       it('check participant balance', async () => {
         const _btcOwnerBalance = await web3.eth.getBalance(btcOwner)
 
-        assert.equal(btcOwnerBalance.toNumber() - withdrawTransactionCost + swapValue, _btcOwnerBalance.toNumber())
+        assert.equal(btcOwnerBalance - withdrawTransactionCost + swapValue, _btcOwnerBalance)
       })
 
       it('check secret', async () => {
@@ -134,9 +134,9 @@ contract('EthToSmthSwap >', async (accounts) => {
 
     describe('TimeOut >', () => {
 
-      it('time', (done) => {
-        setTimeout(done, 6000)
-      })
+      // it('time', (done) => {
+      //   setTimeout(done, 6000)
+      // })
     })
 
     describe('Refund Swap >', () => {
@@ -163,7 +163,7 @@ contract('EthToSmthSwap >', async (accounts) => {
       it('check creator balance', async () => {
         const _ethOwnerBalance = await web3.eth.getBalance(ethOwner)
 
-        assert.equal(ethOwnerBalance.toNumber() - refundTransactionCost + swapValue, _ethOwnerBalance.toNumber())
+        assert.equal(ethOwnerBalance - refundTransactionCost + swapValue, _ethOwnerBalance)
       })
 
       // it('check swap cleaned', async () => {
@@ -186,9 +186,9 @@ contract('EthToSmthSwap >', async (accounts) => {
 
     describe('TimeOut >', () => {
 
-      it('time', (done) => {
-        setTimeout(done, 6000)
-      })
+      // it('time', (done) => {
+      //   setTimeout(done, 6000)
+      // })
     })
 
 

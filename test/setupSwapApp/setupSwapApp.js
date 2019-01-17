@@ -1,13 +1,3 @@
-const swap = require('swap.core')
+const { setup } = require('simple.swap.core')
 
-const configFactory = require('./config')
-
-exports = module.exports = ({ network, ...settings }) => {
-  const getConfig = configFactory[network]
-
-  const config = getConfig(settings)
-
-  swap.app.setup({ contracts: {}, ...config })
-
-  return swap.app
-}
+exports = module.exports = setup
