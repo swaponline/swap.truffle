@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import './SafeMath.sol';
 import './Interfaces.sol';
@@ -8,7 +8,7 @@ contract EthTokenToSmthSwaps {
   using SafeMath for uint;
 
   address public owner;
-  uint256 SafeTime = 3 hours; // atomic swap timeOut
+  uint256 SafeTime = 1 hours; // atomic swap timeOut
 
   struct Swap {
     address token;
@@ -29,7 +29,7 @@ contract EthTokenToSmthSwaps {
     owner = msg.sender;
   }
 
-  event CreateSwap(uint256 createdAt);
+  event CreateSwap(address token, address _buyer, address _seller, uint256 _value, bytes20 _secretHash, uint256 createdAt);
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
@@ -47,9 +47,8 @@ contract EthTokenToSmthSwaps {
       _value
     );
 
-    CreateSwap(now);
+    CreateSwap(_token, _participantAddress, msg.sender, _value, _secretHash, now);
   }
-
   // ETH Owner creates Swap with secretHash and targetWallet
   // ETH Owner make token deposit
   function createSwapTarget(bytes20 _secretHash, address _participantAddress, address _targetWallet, uint256 _value, address _token) public {
@@ -66,20 +65,17 @@ contract EthTokenToSmthSwaps {
       _value
     );
 
-    CreateSwap(now);
+    CreateSwap(_token, _participantAddress, msg.sender, _value, _secretHash, now);
   }
-  
   function getBalance(address _ownerAddress) public view returns (uint256) {
     return swaps[_ownerAddress][msg.sender].balance;
   }
 
+  event Withdraw(address _buyer, address _seller, uint256 withdrawnAt);
   // Get target wallet (buyer check)
   function getTargetWallet(address tokenOwnerAddress) public returns (address) {
       return swaps[tokenOwnerAddress][msg.sender].targetWallet;
   }
-  
-  event Withdraw();
-
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
   function withdraw(bytes32 _secret, address _ownerAddress) public {
@@ -89,12 +85,12 @@ contract EthTokenToSmthSwaps {
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
-    ERC20(swap.token).transfer(msg.sender, swap.balance);
+    ERC20(swap.token).transfer(swap.targetWallet, swap.balance);
 
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
 
-    Withdraw();
+    Withdraw(msg.sender, _ownerAddress, now);
   }
   // Token Owner withdraw money when participan no money for gas and adds secret key to swap
   // BTC Owner receive +1 reputation... may be
@@ -110,7 +106,24 @@ contract EthTokenToSmthSwaps {
     swaps[msg.sender][participantAddress].balance = 0;
     swaps[msg.sender][participantAddress].secret = _secret;
 
-    Withdraw();
+    Withdraw(participantAddress, msg.sender, now);
+  }
+
+  // BTC Owner withdraw money and adds secret key to swap
+  // BTC Owner receive +1 reputation
+  function withdrawOther(bytes32 _secret, address _ownerAddress, address participantAddress) public {
+    Swap memory swap = swaps[_ownerAddress][participantAddress];
+
+    require(swap.secretHash == ripemd160(_secret));
+    require(swap.balance > uint256(0));
+    require(swap.createdAt.add(SafeTime) > now);
+
+    ERC20(swap.token).transfer(swap.targetWallet, swap.balance);
+
+    swaps[_ownerAddress][participantAddress].balance = 0;
+    swaps[_ownerAddress][participantAddress].secret = _secret;
+
+    Withdraw(participantAddress, _ownerAddress, now);
   }
 
   // ETH Owner receive secret
