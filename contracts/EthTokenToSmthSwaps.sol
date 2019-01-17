@@ -47,7 +47,7 @@ contract EthTokenToSmthSwaps {
       _value
     );
 
-    CreateSwap(_token, _participantAddress, msg.sender, _value, _secretHash, now);
+    emit CreateSwap(_token, _participantAddress, msg.sender, _value, _secretHash, now);
   }
   // ETH Owner creates Swap with secretHash and targetWallet
   // ETH Owner make token deposit
@@ -65,7 +65,7 @@ contract EthTokenToSmthSwaps {
       _value
     );
 
-    CreateSwap(_token, _participantAddress, msg.sender, _value, _secretHash, now);
+    emit CreateSwap(_token, _participantAddress, msg.sender, _value, _secretHash, now);
   }
   function getBalance(address _ownerAddress) public view returns (uint256) {
     return swaps[_ownerAddress][msg.sender].balance;
@@ -73,7 +73,7 @@ contract EthTokenToSmthSwaps {
 
   event Withdraw(address _buyer, address _seller, uint256 withdrawnAt);
   // Get target wallet (buyer check)
-  function getTargetWallet(address tokenOwnerAddress) public returns (address) {
+  function getTargetWallet(address tokenOwnerAddress) public view returns (address) {
       return swaps[tokenOwnerAddress][msg.sender].targetWallet;
   }
   // BTC Owner withdraw money and adds secret key to swap
@@ -81,7 +81,7 @@ contract EthTokenToSmthSwaps {
   function withdraw(bytes32 _secret, address _ownerAddress) public {
     Swap memory swap = swaps[_ownerAddress][msg.sender];
 
-    require(swap.secretHash == ripemd160(_secret));
+    require(swap.secretHash == ripemd160(abi.encodePacked(_secret)));
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
@@ -90,14 +90,14 @@ contract EthTokenToSmthSwaps {
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
 
-    Withdraw(msg.sender, _ownerAddress, now);
+    emit Withdraw(msg.sender, _ownerAddress, now);
   }
   // Token Owner withdraw money when participan no money for gas and adds secret key to swap
   // BTC Owner receive +1 reputation... may be
   function withdrawNoMoney(bytes32 _secret, address participantAddress) public {
     Swap memory swap = swaps[msg.sender][participantAddress];
 
-    require(swap.secretHash == ripemd160(_secret));
+    require(swap.secretHash == ripemd160(abi.encodePacked(_secret)));
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
@@ -106,7 +106,7 @@ contract EthTokenToSmthSwaps {
     swaps[msg.sender][participantAddress].balance = 0;
     swaps[msg.sender][participantAddress].secret = _secret;
 
-    Withdraw(participantAddress, msg.sender, now);
+    emit Withdraw(participantAddress, msg.sender, now);
   }
 
   // BTC Owner withdraw money and adds secret key to swap
@@ -114,7 +114,7 @@ contract EthTokenToSmthSwaps {
   function withdrawOther(bytes32 _secret, address _ownerAddress, address participantAddress) public {
     Swap memory swap = swaps[_ownerAddress][participantAddress];
 
-    require(swap.secretHash == ripemd160(_secret));
+    require(swap.secretHash == ripemd160(abi.encodePacked(_secret)));
     require(swap.balance > uint256(0));
     require(swap.createdAt.add(SafeTime) > now);
 
@@ -123,7 +123,7 @@ contract EthTokenToSmthSwaps {
     swaps[_ownerAddress][participantAddress].balance = 0;
     swaps[_ownerAddress][participantAddress].secret = _secret;
 
-    Withdraw(participantAddress, _ownerAddress, now);
+    emit Withdraw(participantAddress, _ownerAddress, now);
   }
 
   // ETH Owner receive secret
@@ -144,7 +144,7 @@ contract EthTokenToSmthSwaps {
     ERC20(swap.token).transfer(msg.sender, swap.balance);
     clean(msg.sender, _participantAddress);
 
-    Refund();
+    emit Refund();
   }
 
   function clean(address _ownerAddress, address _participantAddress) internal {
