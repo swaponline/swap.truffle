@@ -71,7 +71,7 @@ contract EthToSmthSwaps {
       return swaps[_ownerAddress][msg.sender].targetWallet;
   }
 
-  event Withdraw(address _buyer, address _seller, uint256 withdrawnAt);
+  event Withdraw(address _buyer, address _seller, bytes20 _secretHash, uint256 withdrawnAt);
 
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
@@ -87,7 +87,7 @@ contract EthToSmthSwaps {
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
 
-    emit Withdraw(msg.sender, _ownerAddress, now);
+    emit Withdraw(msg.sender, _ownerAddress, swap.secretHash, now);
   }
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
@@ -103,7 +103,7 @@ contract EthToSmthSwaps {
     swaps[msg.sender][participantAddress].balance = 0;
     swaps[msg.sender][participantAddress].secret = _secret;
 
-    emit Withdraw(participantAddress, msg.sender, now);
+    emit Withdraw(participantAddress, msg.sender, swap.secretHash, now);
   }
   // BTC Owner withdraw money and adds secret key to swap
   // BTC Owner receive +1 reputation
@@ -119,7 +119,7 @@ contract EthToSmthSwaps {
     swaps[_ownerAddress][participantAddress].balance = 0;
     swaps[_ownerAddress][participantAddress].secret = _secret;
 
-    emit Withdraw(participantAddress, _ownerAddress, now);
+    emit Withdraw(participantAddress, _ownerAddress, swap.secretHash, now);
   }
 
   // ETH Owner receive secret
@@ -131,7 +131,7 @@ contract EthToSmthSwaps {
 
 
 
-  event Refund(address _buyer, address _seller);
+  event Refund(address _buyer, address _seller, bytes20 _secretHash);
 
   // ETH Owner refund money
   // BTC Owner gets -1 reputation
@@ -145,7 +145,7 @@ contract EthToSmthSwaps {
 
     clean(msg.sender, _participantAddress);
 
-    emit Refund(_participantAddress, msg.sender);
+    emit Refund(_participantAddress, msg.sender, swap.secretHash);
   }
 
   function clean(address _ownerAddress, address _participantAddress) internal {

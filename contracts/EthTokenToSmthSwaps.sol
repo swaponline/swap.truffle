@@ -71,7 +71,7 @@ contract EthTokenToSmthSwaps {
     return swaps[_ownerAddress][msg.sender].balance;
   }
 
-  event Withdraw(address _buyer, address _seller, uint256 withdrawnAt);
+  event Withdraw(address _buyer, address _seller, bytes20 _secretHash, uint256 withdrawnAt);
   // Get target wallet (buyer check)
   function getTargetWallet(address tokenOwnerAddress) public view returns (address) {
       return swaps[tokenOwnerAddress][msg.sender].targetWallet;
@@ -90,7 +90,7 @@ contract EthTokenToSmthSwaps {
     swaps[_ownerAddress][msg.sender].balance = 0;
     swaps[_ownerAddress][msg.sender].secret = _secret;
 
-    emit Withdraw(msg.sender, _ownerAddress, now);
+    emit Withdraw(msg.sender, _ownerAddress, swap.secretHash, now);
   }
   // Token Owner withdraw money when participan no money for gas and adds secret key to swap
   // BTC Owner receive +1 reputation... may be
@@ -106,7 +106,7 @@ contract EthTokenToSmthSwaps {
     swaps[msg.sender][participantAddress].balance = 0;
     swaps[msg.sender][participantAddress].secret = _secret;
 
-    emit Withdraw(participantAddress, msg.sender, now);
+    emit Withdraw(participantAddress, msg.sender, swap.secretHash, now);
   }
 
   // BTC Owner withdraw money and adds secret key to swap
@@ -123,7 +123,7 @@ contract EthTokenToSmthSwaps {
     swaps[_ownerAddress][participantAddress].balance = 0;
     swaps[_ownerAddress][participantAddress].secret = _secret;
 
-    emit Withdraw(participantAddress, _ownerAddress, now);
+    emit Withdraw(participantAddress, _ownerAddress, swap.secretHash, now);
   }
 
   // ETH Owner receive secret
@@ -131,7 +131,7 @@ contract EthTokenToSmthSwaps {
     return swaps[msg.sender][_participantAddress].secret;
   }
 
-  event Refund();
+  event Refund(address _buyer, address _seller, bytes20 _secretHash);
 
   // ETH Owner refund money
   // BTC Owner gets -1 reputation
@@ -144,7 +144,7 @@ contract EthTokenToSmthSwaps {
     ERC20(swap.token).transfer(msg.sender, swap.balance);
     clean(msg.sender, _participantAddress);
 
-    emit Refund();
+    emit Refund(_participantAddress, msg.sender, swap.secretHash);
   }
 
   function clean(address _ownerAddress, address _participantAddress) internal {
