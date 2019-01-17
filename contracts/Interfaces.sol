@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.5.0;
 
 contract ERC20 {
     function transfer(address _to, uint256 _value) public;

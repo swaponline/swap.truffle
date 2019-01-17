@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import './SafeMath.sol';
 
@@ -11,7 +11,7 @@ contract EthToSmthSwaps {
   uint256 SafeTime = 1 hours; // atomic swap timeOut
 
   struct Swap {
-    address targetWallet;
+    address payable targetWallet;
     bytes32 secret;
     bytes20 secretHash;
     uint256 createdAt;
@@ -30,7 +30,7 @@ contract EthToSmthSwaps {
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
-  function createSwap(bytes20 _secretHash, address _participantAddress) public payable {
+  function createSwap(bytes20 _secretHash, address payable _participantAddress) public payable {
     require(msg.value > 0);
     require(swaps[msg.sender][_participantAddress].balance == uint256(0));
 
@@ -47,7 +47,7 @@ contract EthToSmthSwaps {
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
-  function createSwapTarget(bytes20 _secretHash, address _participantAddress, address _targetWallet) public payable {
+  function createSwapTarget(bytes20 _secretHash, address payable _participantAddress, address payable _targetWallet) public payable {
     require(msg.value > 0);
     require(swaps[msg.sender][_participantAddress].balance == uint256(0));
 

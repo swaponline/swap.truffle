@@ -1,4 +1,4 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.5.0;
 
 import './SafeMath.sol';
 
@@ -42,7 +42,7 @@ contract Token is Owned {
     event Transfer(address indexed _from, address indexed _to, uint _value);
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 
-    constructor (string _name, string _symbol, uint8 _decimals) public {
+    constructor (string memory _name, string memory _symbol, uint8 _decimals) public {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -96,7 +96,7 @@ contract Token is Owned {
         return true;
     }
 
-    function multimint(address[] dests, uint[] values) public only(owner) returns (uint) {
+    function multimint(address[] memory dests, uint[] memory values) public only(owner) returns (uint) {
         uint i = 0;
         while (i < dests.length) {
            mint(dests[i], values[i]);

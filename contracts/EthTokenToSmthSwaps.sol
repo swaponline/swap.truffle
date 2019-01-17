@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import './SafeMath.sol';
 import './Interfaces.sol';
@@ -12,7 +12,7 @@ contract EthTokenToSmthSwaps {
 
   struct Swap {
     address token;
-    address targetWallet;
+    address payable targetWallet;
     bytes32 secret;
     bytes20 secretHash;
     uint256 createdAt;
@@ -33,10 +33,10 @@ contract EthTokenToSmthSwaps {
 
   // ETH Owner creates Swap with secretHash
   // ETH Owner make token deposit
-  function createSwap(bytes20 _secretHash, address _participantAddress, uint256 _value, address _token) public {
+  function createSwap(bytes20 _secretHash, address payable _participantAddress, uint256 _value, address _token) public {
     require(_value > 0);
     require(swaps[msg.sender][_participantAddress].balance == uint256(0));
-    require(ERC20(_token).transferFrom(msg.sender, this, _value));
+    require(ERC20(_token).transferFrom(msg.sender, address(this), _value));
 
     swaps[msg.sender][_participantAddress] = Swap(
       _token,
@@ -51,10 +51,10 @@ contract EthTokenToSmthSwaps {
   }
   // ETH Owner creates Swap with secretHash and targetWallet
   // ETH Owner make token deposit
-  function createSwapTarget(bytes20 _secretHash, address _participantAddress, address _targetWallet, uint256 _value, address _token) public {
+  function createSwapTarget(bytes20 _secretHash, address payable _participantAddress, address payable _targetWallet, uint256 _value, address _token) public {
     require(_value > 0);
     require(swaps[msg.sender][_participantAddress].balance == uint256(0));
-    require(ERC20(_token).transferFrom(msg.sender, this, _value));
+    require(ERC20(_token).transferFrom(msg.sender, address(this), _value));
 
     swaps[msg.sender][_participantAddress] = Swap(
       _token,
